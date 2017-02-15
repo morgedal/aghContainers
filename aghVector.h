@@ -53,7 +53,9 @@ template<typename T> class aghVector : public aghContainer<T>
 
   private:
     void rewriteElements( aghContainer<T> const & element );
+    void rewriteAroundInserted( T * tmp, int index );
     bool removeLastElement();
+    void rewriteWithoutRemoved( T * tmp, int index );
 };
 
 template <typename T> aghVector<T>::aghVector( void )
@@ -64,10 +66,10 @@ template <typename T> aghVector<T>::aghVector( void )
 
 template <typename T> aghVector<T>::aghVector( aghContainer<T> const & container )
 {
-    if ( ( length = element.size() ) == 0 )
+    if ( ( length = container.size() ) == 0 )
         tab = NULL;
     else
-        rewriteElements( element );
+        rewriteElements( container );
 }
 
 template <typename T> void aghVector<T>::rewriteElements( aghContainer<T> const & container )
@@ -75,18 +77,18 @@ template <typename T> void aghVector<T>::rewriteElements( aghContainer<T> const 
     tab = new T[ length ];
 
     for( int i = 0 ; i < length ; i++ )
-        tab[ i ] = element[ i ];
+        tab[ i ] = container[ i ];
 }
 
-template <typename T> aghVector<T>::aghVector( aghVector<T> const & element )
+template <typename T> aghVector<T>::aghVector( aghVector<T> const & container )
 {
     if( tab != NULL )
         delete [] tab;
 
-    if( ( length = element.size() ) == 0 )
+    if( ( length = container.size() ) == 0 )
         tab = NULL;
     else
-        rewriteElements( element );
+        rewriteElements( container );
 }
 
 template <typename T> aghVector<T>::~aghVector( void )
@@ -119,7 +121,18 @@ template <typename T> bool aghVector<T>::insert( int index, T const & element )
 
     T* tmp = new T[ length + 1 ];
     tmp[ index ] = element;           //wpisuje element w odpowiednim miejscu
+    rewriteAroundInserted( tmp, index );
 
+    if( tab != NULL )
+        delete [] tab;
+    tab = tmp;
+    length++;
+
+    return true;
+}
+
+template <typename T> void aghVector<T>::rewriteAroundInserted( T * tmp, int index )
+{
     int i = 0, j = 0;
     while( i != length )                        //dopoki nie przejdziemy wszystkich elementow z tab przepisuje je
     {                                           //do nowej tablicy z wylaczeniem elementu do ktorego wpisujemy
@@ -131,13 +144,6 @@ template <typename T> bool aghVector<T>::insert( int index, T const & element )
         }
         j++;
     }
-
-    if( tab != NULL )
-        delete [] tab;
-    tab = tmp;
-    length++;
-
-    return true;
 }
 
 template <typename T> T& aghVector<T>::at( int index ) const
@@ -162,18 +168,7 @@ template <typename T> bool aghVector<T>::remove( int index )
         return removeLastElement();
 
     T* tmp = new T[ length - 1 ];
-
-    int i = 0, j = 0;
-    while( i != length + 1 )                // jak w insert przepisujemy wszystkie elementy, ale pomijajac usuwany
-    {                                       // warunek length+1, bo inkrementujemy i na koncu petli
-        while( i != length && i != index )
-        {
-            tmp[ j ] = tab[ i ];
-            i++;
-            j++;
-        }
-        i++;
-    }
+    rewriteWithoutRemoved( tmp , index );
 
     if( tab != NULL )
         delete [] tab;
@@ -189,6 +184,21 @@ template <typename T> bool aghVector<T>::removeLastElement( void )
     delete [] tab;
     tab = NULL;
     return true;
+}
+
+template <typename T> void aghVector<T>::rewriteWithoutRemoved( T * tmp, int index )
+{
+    int i = 0, j = 0;
+    while( i != length + 1 )                // jak w insert przepisujemy wszystkie elementy, ale pomijajac usuwany
+    {                                       // warunek length+1, bo inkrementujemy i na koncu petli
+        while( i != length && i != index )
+        {
+            tmp[ j ] = tab[ i ];
+            i++;
+            j++;
+        }
+        i++;
+    }
 }
 
 #endif // AGHVECTOR_H

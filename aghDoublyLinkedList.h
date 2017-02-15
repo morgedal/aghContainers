@@ -73,6 +73,7 @@ template<typename T> class aghDlist : public aghContainer<T>
     bool remove( int index );
 
   private:
+    void initFromContainer( aghContainer<T> const & container );
     void insertAtBeginning( Node * newNode );
     void insertAtEnd( Node * newNode );
     void insertAtMiddle( int index, Node * newNode );
@@ -105,14 +106,15 @@ template<typename T> class aghDlist : public aghContainer<T>
 
 template <typename T> aghDlist<T>::aghDlist( aghContainer<T> const & container )
 {
-    length = 0;
-    first = NULL;
-    last = NULL;
-    for( int i = 0 ; i < container.size() ; i++ )
-        insert( i, container.at( i ) );
+    initFromContainer( container );
 }
 
 template <typename T> aghDlist<T>::aghDlist( const aghDlist<T> & container )
+{
+    initFromContainer( container );
+}
+
+template <typename T> void aghDlist<T>::initFromContainer( aghContainer<T> const & container )
 {
     length = 0;
     first = NULL;

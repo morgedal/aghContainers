@@ -69,6 +69,7 @@ template<typename T> class aghSlist : public aghContainer<T>
     bool remove( int index );
 
   private:
+    void initFromContainer( aghContainer<T> const & container );
     void insertAtBeginning( Node * newNode );
     void insertAtEnd( Node * newNode );
     void insertAtMiddle( int index, Node * newNode );
@@ -87,13 +88,15 @@ template<typename T> class aghSlist : public aghContainer<T>
 
 template <typename T> aghSlist<T>::aghSlist( aghContainer<T> const & container )
 {
-    length = 0;
-    first = NULL;
-    for( int i = 0 ; i < container.size() ; i++ )
-        insert( i, container.at( i ) );
+    initFromContainer( container );
 }
 
 template <typename T> aghSlist<T>::aghSlist( const aghSlist<T> & container )
+{
+    initFromContainer( container );
+}
+
+template <typename T> void aghSlist<T>::initFromContainer( aghContainer<T> const & container )
 {
     length = 0;
     first = NULL;
